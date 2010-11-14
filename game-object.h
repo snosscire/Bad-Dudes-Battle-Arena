@@ -28,5 +28,6 @@ GameObject * game_object_simple_object_collision ( GameObject *object, List *obj
 
 GameObject * player_new  ( int id );
 void         player_kill ( GameObject *player );
+void         player_move ( GameObject *player, float radian_angle, float speed_percentage, float *new_x, float *new_y );
 
 #endif /* __GAME_OBJECT_H__ */
