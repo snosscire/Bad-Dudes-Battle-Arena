@@ -70,9 +70,9 @@ struct __game_object
 	
 	int slide_collision;
 	
-	int (*do_collision) ( GameObject *source, GameObject *target );
+	void (*do_move)      ( GameObject *object, float radian_angle, float speed_percentage, float *new_x, float *new_y );
+	int  (*do_collision) ( GameObject *source, GameObject *target );
 	
-	int i_am_special;
 	int move_forward;
 	int move_backward;
 	int strafe_left;

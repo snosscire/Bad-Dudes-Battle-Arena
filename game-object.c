@@ -119,52 +119,15 @@ void game_object_update_real ( GameObject *object, int do_object_collision, int 
 		float new_x = object->x;
 		float new_y = object->y;
 		
-		if( object->i_am_special )
+		if( object->do_move )
 		{
-			object->speed = 0.0;
-			/* object->sprite->current_animation = object->sprite->animations[PLAYER_ANIMATION_IDLE]; */
-			
-			if( object->move_forward OR object->move_backward OR object->strafe_left OR object->strafe_right )
-			{
-				object->speed = 1.8;
-				/* object->sprite->current_animation = object->sprite->animations[PLAYER_ANIMATION_WALK]; */
-			}
-			
-			if( object->move_forward )
-			{
-				new_x = object->x + (speed_percentage * cos(radian_angle));
-				new_y = object->y + (speed_percentage * sin(radian_angle));
-			}
-			else if( object->move_backward )
-			{
-				new_x = object->x - (speed_percentage * cos(radian_angle));
-				new_y = object->y - (speed_percentage * sin(radian_angle));
-			}
-			
-			if( object->strafe_left )
-			{
-				float other_radian_angle = (add_to_angle(object->angle, 90)) * (PI / 180);
-				new_x -= ((speed_percentage / 2) * cos(other_radian_angle));
-				new_y -= ((speed_percentage / 2) * sin(other_radian_angle));
-			}
-			else if( object->strafe_right )
-			{
-				float other_radian_angle = (add_to_angle(object->angle, -90)) * (PI / 180);
-				new_x -= ((speed_percentage / 2) * cos(other_radian_angle));
-				new_y -= ((speed_percentage / 2) * sin(other_radian_angle));
-			}
-			
-			if( client_get_player() == object )
-			{
-				network_send_update_message(client_get_host(), client_get_peer(), object);
-			}
+			object->do_move(object, radian_angle, speed_percentage, &new_x, &new_y);
 		}
 		else
 		{
 			new_x = object->x + (speed_percentage * cos(radian_angle));
 			new_y = object->y + (speed_percentage * sin(radian_angle));
 		}
-		
 		
 		if( new_x != object->x OR new_y != object->y )
 		{
@@ -354,7 +317,7 @@ GameObject * player_new( int id )
 	player->height = 25;
 	player->health = 100;
 	player->slide_collision = TRUE;
-	player->i_am_special = TRUE;
+	player->do_move = player_move;
 	
 	sprite->surface = graphics_manager_load_surface("gfx/player.png");
 	sprite->width = PLAYER_SPRITE_WIDTH;
@@ -386,5 +349,40 @@ void player_kill( GameObject *player )
 	
 	player->speed = 0.0;
 	player->health = 0;
+}
+
+void player_move ( GameObject *player, float radian_angle, float speed_percentage, float *new_x, float *new_y )
+{
+	player->speed = 0.0;
+	/* player->sprite->current_animation = player->sprite->animations[PLAYER_ANIMATION_IDLE]; */
+	
+	if( player->move_forward OR player->move_backward OR player->strafe_left OR player->strafe_right )
+	{
+		player->speed = 1.8;
+		/* player->sprite->current_animation = player->sprite->animations[PLAYER_ANIMATION_WALK]; */
+	}
+	
+	if( player->move_forward )
+	{
+		*new_y = player->y - speed_percentage;
+	}
+	else if( player->move_backward  )
+	{
+		*new_y = player->y + speed_percentage;
+	}
+	
+	if( player->strafe_left )
+	{
+		*new_x = player->x - speed_percentage;
+	}
+	else if( player->strafe_right )
+	{
+		*new_x = player->x + speed_percentage;
+	}
+	
+	if( client_get_player() == player )
+	{
+		network_send_update_message(client_get_host(), client_get_peer(), player);
+	}
 }
 

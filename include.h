@@ -11,7 +11,7 @@
 
 #include "enet/enet.h"
 
-#include "json.h"
+#include <mjson-1.3/json.h>
 
 #include "structs.h"
 #include "client.h"
